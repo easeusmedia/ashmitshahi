@@ -138,6 +138,7 @@ footer{padding:30px 0 46px;border-top:1px solid var(--hair)}
       <p class="sc-sub">Free, every week. Unsubscribe anytime.</p>
       <!-- ============ CONVERTKIT / KIT FORM ============ -->
       <form class="ckform" id="ck-form" novalidate>
+        <div class="fld"><input type="text" id="ck-name" placeholder="Your first name" aria-label="First name"></div>
         <div class="fld"><input type="email" id="ck-email" name="email_address" placeholder="Your email address" aria-label="Email" required></div>
         <div class="wa">
           <div class="ccsel"><select id="ck-cc" aria-label="Country code"><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+880">🇧🇩 +880</option><option value="+94">🇱🇰 +94</option><option value="+977">🇳🇵 +977</option><option value="+975">🇧🇹 +975</option><option value="+960">🇲🇻 +960</option><option value="+971">🇦🇪 +971</option><option value="+44">🇬🇧 +44</option><option value="+1">🇺🇸 +1</option><option value="+65">🇸🇬 +65</option><option value="+61">🇦🇺 +61</option><option value="+1">🇨🇦 +1</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+60">🇲🇾 +60</option></select></div>
@@ -188,15 +189,19 @@ footer{padding:30px 0 46px;border-top:1px solid var(--hair)}
         https://app.kit.com/forms/1234567/subscriptions
         The number in the middle (1234567) is your Form ID.
      2. CK_PHONE_FIELD: the Kit field key the WhatsApp number is
-        stored in. Here it is "first_name" (Kit's built-in field,
-        which this form's Whatsapp input maps to). If you later
-        make a dedicated custom field, put its key here instead.
+        stored in. It is "whatsapp" here - a custom field you
+        must create in Kit first (the built-in first_name field is
+        now used by the First name input). To create it: profile
+        picture (top-right) > Settings > Custom Fields > Add Field,
+        key "whatsapp". Until it exists, email + first name still
+        save but the number is silently dropped.
      ============================================================ */
   var CK_FORM_ID    = "9705757";
-  var CK_PHONE_FIELD = "first_name";  // Kit field the WhatsApp number is stored in
+  var CK_PHONE_FIELD = "whatsapp";  // Kit custom field for the WhatsApp number (create it in Kit)
 
   var form  = document.getElementById("ck-form");
   if (!form) return;
+  var name  = document.getElementById("ck-name");
   var email = document.getElementById("ck-email");
   var cc    = document.getElementById("ck-cc");
   var phone = document.getElementById("ck-phone");
@@ -216,6 +221,8 @@ footer{padding:30px 0 46px;border-top:1px solid var(--hair)}
 
     var data = new FormData();
     data.append("email_address", mail);
+    var fname = (name.value || "").trim();
+    if (fname) data.append("fields[first_name]", fname);
     if (fullPhone) data.append("fields[" + CK_PHONE_FIELD + "]", fullPhone);
 
     var label = btn.textContent;
