@@ -18,14 +18,27 @@
 <style>
 html{scroll-behavior:smooth}
 body{margin:0;background:#020c18;color:#eef4fb}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.nav-links,.nav-links a,.nav-burger span{transition:none !important}}
 .yt-embed{position:absolute;inset:0;width:100%;height:100%;border:0}
 /* ---------- phone layout (≤720px) ---------- */
+.nav-burger{display:none;position:relative;z-index:3;flex:none;width:44px;height:44px;padding:0;place-content:center;gap:6px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#eef4fb;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav-burger span{display:block;width:18px;height:2px;border-radius:2px;background:currentColor;transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.nav-open .nav-burger span:first-child{transform:translateY(4px) rotate(45deg)}
+.nav-open .nav-burger span:last-child{transform:translateY(-4px) rotate(-45deg)}
 @media (max-width:720px){
   header.site-nav{padding-block:18px !important}
-  header.site-nav{gap:16px !important;flex-wrap:wrap !important}
-  .nav-links{flex:1 1 100%;display:grid !important;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:12px 16px !important}
-  .nav-links a:last-child{position:absolute;top:18px;right:24px;padding:10px 14px !important;font-size:13px !important;white-space:nowrap}
+  header.site-nav{gap:12px !important;flex-wrap:nowrap !important}
+  .nav-burger{display:grid}
+  .nav-links{position:fixed;top:0;right:0;bottom:0;z-index:2;width:min(84vw,340px);box-sizing:border-box;display:flex !important;flex-direction:column;align-items:stretch !important;flex-wrap:nowrap !important;gap:0 !important;padding:92px 24px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;background:linear-gradient(160deg,rgba(40,90,150,.38),rgba(4,18,36,.58));backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);border-left:1px solid rgba(255,255,255,.14);border-radius:28px 0 0 28px;box-shadow:-30px 0 80px rgba(0,0,0,.45),inset 1px 1px 0 rgba(255,255,255,.08);transform:translateX(105%);visibility:hidden;transition:transform .5s cubic-bezier(.22,1,.36,1),visibility 0s .5s}
+  .nav-open .nav-links{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+  .nav-links a{font-family:'Space Grotesk',sans-serif;font-size:24px !important;font-weight:500;letter-spacing:-.01em;color:#eef4fb !important;padding:14px 4px;border-bottom:1px solid rgba(255,255,255,.08);opacity:0;transform:translateX(18px);transition:opacity .35s,transform .5s cubic-bezier(.22,1,.36,1)}
+  .nav-open .nav-links a{opacity:1;transform:none}
+  .nav-open .nav-links a:nth-child(1){transition-delay:.08s} .nav-open .nav-links a:nth-child(2){transition-delay:.12s} .nav-open .nav-links a:nth-child(3){transition-delay:.16s} .nav-open .nav-links a:nth-child(4){transition-delay:.2s} .nav-open .nav-links a:nth-child(5){transition-delay:.24s} .nav-open .nav-links a:nth-child(6){transition-delay:.28s} .nav-open .nav-links a:nth-child(7){transition-delay:.32s}
+  .nav-links a:last-child{margin-top:auto;border:0;text-align:center;font-family:Inter,sans-serif;font-size:16px !important;font-weight:600;padding:16px !important;box-shadow:0 12px 32px rgba(0,115,230,.45)}
+  header.site-nav::after{content:"";position:fixed;inset:0;z-index:1;background:rgba(2,12,24,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .4s}
+  .nav-open header.site-nav::after{opacity:1;pointer-events:auto}
+  .nav-open header.site-nav{z-index:100 !important}
+  html.nav-open{overflow:hidden}
   #guide dl > div{justify-content:flex-end}
   #top{padding-top:24px !important;padding-bottom:40px !important;gap:32px !important}
   #top h1{font-size:46px !important}
@@ -1105,6 +1118,23 @@ document.querySelectorAll('form[data-kit-form]').forEach(form => {
     } catch(err) { btn.disabled = false; btn.textContent = label; alert('That did not go through. Please try again, or email me directly.'); console.error(err); }
   });
 });
+
+/* ---------- phone menu ---------- */
+document.querySelectorAll('header.site-nav').forEach(h => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'nav-burger'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-expanded', 'false');
+  b.innerHTML = '<span></span><span></span>';
+  h.appendChild(b);
+});
+const setMenu = open => {
+  document.documentElement.classList.toggle('nav-open', open);
+  document.querySelectorAll('.nav-burger').forEach(b => b.setAttribute('aria-expanded', open));
+};
+document.addEventListener('click', e => {
+  if (e.target.closest('.nav-burger')) return setMenu(!document.documentElement.classList.contains('nav-open'));
+  if (document.documentElement.classList.contains('nav-open') && (!e.target.closest('.nav-links') || e.target.closest('a'))) setMenu(false);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
 
 /* ---------- YouTube: latest long-form + most watched ---------- */
 /* phones get the 640px thumbnails; the 1280px ones are 3x the bytes for no visible gain */
