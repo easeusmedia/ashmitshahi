@@ -191,7 +191,7 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #00AA
 <div style="flex: 1 1 380px; max-width: 500px; min-width: 0; position: relative">
 <div class="as-glow-portrait" aria-hidden="true"></div>
 <div class="portrait" style="position: relative; border-radius: 32px; overflow: hidden; aspect-ratio: 4 / 5; border: 1px solid rgba(0,170,255,.28); box-shadow: 0 40px 80px rgba(0,0,0,.55)">
-<img src="img/ashmit.jpg" alt="Ashmit Shahi" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block">
+<img src="img/ashmit.jpg" fetchpriority="high" alt="Ashmit Shahi" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block">
 <div aria-hidden="true" style="position: absolute; inset: 55% 0 0 0; background: linear-gradient(180deg, rgba(2,12,24,0) 0%, rgba(2,12,24,.85) 100%)"></div>
 <p style="position: absolute; top: 18px; right: 18px; margin: 0; padding: 8px 14px; border-radius: 999px; background: rgba(2,12,24,.7); border: 1px solid rgba(255,255,255,.14); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #d6e3f1">Founder · content agency · Delhi</p>
 </div>
@@ -1107,12 +1107,16 @@ document.querySelectorAll('form[data-kit-form]').forEach(form => {
 });
 
 /* ---------- YouTube: latest long-form + most watched ---------- */
+/* phones get the 640px thumbnails; the 1280px ones are 3x the bytes for no visible gain */
+const PHONE = matchMedia('(max-width: 720px)').matches;
+if (PHONE) document.querySelectorAll('img[src*="/maxresdefault.jpg"]').forEach(i => { i.src = i.src.replace('/maxresdefault.jpg', '/sddefault.jpg'); });
+
 const YT = {
   fmtViews(n){ return n >= 1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M' : n >= 1e3 ? Math.round(n/1e3) + 'K' : String(n); },
   iso(d){ const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(d||''); return m ? (+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0) : 0; },
   clean(t){ return t.split(' | ')[0].split(' |')[0].replace(/\s*#?EP[-. ]?\d+\s*$/i,'').trim(); },
   ep(t){ const m = /EP\.?\s?-?\s?(\d+)/i.exec(t); return m ? 'Ep. ' + m[1] : null; },
-  thumb(id){ return 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg'; },
+  thumb(id){ return 'https://i.ytimg.com/vi/' + id + (PHONE ? '/sddefault.jpg' : '/maxresdefault.jpg'); },
   async api(path, params){ const u = new URL('https://www.googleapis.com/youtube/v3/' + path); Object.entries(Object.assign({}, params, { key: CONFIG.youtubeApiKey })).forEach(([k,v]) => u.searchParams.set(k, v)); const r = await fetch(u); if (!r.ok) throw new Error('YouTube API ' + r.status); return r.json(); },
   async uploads(channelId, pages){
     const key = 'yt_' + channelId; try { const c = JSON.parse(localStorage.getItem(key) || 'null'); if (c && Date.now() - c.t < CONFIG.cacheHours*3600e3) return c.v; } catch(e){}
